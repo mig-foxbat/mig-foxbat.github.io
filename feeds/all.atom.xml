@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>foxbat</title><link href="http://blog.foobarbaz.info/" rel="alternate"></link><link href="http://blog.foobarbaz.info/feeds/all.atom.xml" rel="self"></link><id>http://blog.foobarbaz.info/</id><updated>2015-05-31T00:00:00-07:00</updated><entry><title>Scala collection functions</title><link href="http://blog.foobarbaz.info/scala-collection-functions.html" rel="alternate"></link><updated>2015-05-31T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-31:scala-collection-functions.html</id><summary type="html">&lt;p&gt;Scala collections library has an impressive arsenal of functions to process sequences in a functional approach. Only a very few are being listed down here.&lt;/p&gt;</summary><category term="scala"></category><category term="collections"></category></entry><entry><title>Ebean encryption</title><link href="http://blog.foobarbaz.info/ebean-encryption.html" rel="alternate"></link><updated>2015-05-26T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-26:ebean-encryption.html</id><summary type="html">&lt;p&gt;If you want to encrypt a database field and you happen to use Play-Framework 2.x, Mysql and Ebean for ORM, this blog post will help you achieve just that.&lt;/p&gt;
+&lt;p&gt;Now the best way to achieve this is to use &lt;code&gt;@encrypt&lt;/code&gt; JPA annotation on the model field. Using this annotation would be make the process of encryption/decryption completely transparent to the rest of your codebase. Apart from the model class no other part of your code has to be aware of this process. So for example if you are encrypting a field called password in your model this is how it would look like.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    @Encrypted
+    public String password;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Though the field's type is String, the corresponding database field type won't be &lt;code&gt;CHAR&lt;/code&gt; or &lt;code&gt;VARCHAR&lt;/code&gt; as you would expect. Since we are encrypting the field, database type will be binary or byte or another equivalent type supported by the database. For My-SQL it was &lt;code&gt;VARBINARY&lt;/code&gt;. If you want to override the type to say &lt;code&gt;VARCHAR&lt;/code&gt; you can use the JPA annotion property like this &lt;code&gt;@Column(columnDefinition="varchar(50)")&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Now any reversible encryption/decryption algorithm requires a key this key was supposed to be set by defining the key in applications.conf file or ebean.properties file in your Play application. But due to a yet to be resolved bug in the framework we will have to take a work around as posted in this &lt;a href="http://stackoverflow.com/questions/15800453/play-framework-2-1-java-ebean-encrypted-annotation-errors"&gt;SO Post&lt;/a&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;package&lt;/span&gt; &lt;span class="n"&gt;models&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.avaje.ebean.config.ServerConfig&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.avaje.ebean.event.ServerConfigStartup&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;     
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.avaje.ebean.config.EncryptKey&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;       
+&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;com.avaje.ebean.config.EncryptKeyManager&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt; 
+
+&lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CustomServerConfigStartup&lt;/span&gt; &lt;span class="n"&gt;implements&lt;/span&gt; &lt;span class="n"&gt;ServerConfigStartup&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; 
+
+    &lt;span class="nd"&gt;@Override&lt;/span&gt; 
+    &lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="n"&gt;void&lt;/span&gt; &lt;span class="n"&gt;onStart&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ServerConfig&lt;/span&gt; &lt;span class="n"&gt;serverConfig&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;     
+          &lt;span class="n"&gt;serverConfig&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;setEncryptKeyManager&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="n"&gt;BasicEncryptKeyManager&lt;/span&gt;&lt;span class="p"&gt;());&lt;/span&gt;     
+    &lt;span class="p"&gt;}&lt;/span&gt;     
+&lt;span class="p"&gt;}&lt;/span&gt; 
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;BasicEncryptKeyManager&lt;/span&gt; &lt;span class="n"&gt;implements&lt;/span&gt; &lt;span class="n"&gt;EncryptKeyManager&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt; 
+
+ &lt;span class="nd"&gt;@Override&lt;/span&gt; 
+ &lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="n"&gt;EncryptKey&lt;/span&gt; &lt;span class="n"&gt;getEncryptKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;tableName&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;     
+       &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;new&lt;/span&gt; &lt;span class="n"&gt;CustomEncryptKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tableName&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;     
+ &lt;span class="p"&gt;}&lt;/span&gt; 
+
+ &lt;span class="nd"&gt;@Override&lt;/span&gt; 
+ &lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="n"&gt;void&lt;/span&gt; &lt;span class="n"&gt;initialise&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; 
+     &lt;span class="o"&gt;//&lt;/span&gt;&lt;span class="n"&gt;Do&lt;/span&gt; &lt;span class="n"&gt;nothing&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;yet&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+ &lt;span class="p"&gt;}&lt;/span&gt; 
+
+&lt;span class="p"&gt;}&lt;/span&gt; 
+
+&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CustomEncryptKey&lt;/span&gt; &lt;span class="n"&gt;implements&lt;/span&gt; &lt;span class="n"&gt;EncryptKey&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt; 
+
+   &lt;span class="n"&gt;private&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;tableName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+   &lt;span class="n"&gt;private&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+   &lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="n"&gt;CustomEncryptKey&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;tableName&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;){&lt;/span&gt;
+      &lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tableName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;tableName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+      &lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columnName&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+   &lt;span class="p"&gt;}&lt;/span&gt;
+
+ &lt;span class="nd"&gt;@Override&lt;/span&gt; 
+ &lt;span class="n"&gt;public&lt;/span&gt; &lt;span class="n"&gt;String&lt;/span&gt; &lt;span class="n"&gt;getStringValue&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;     
+        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;play&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Configuration&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;root&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getString&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;application.secret&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;::&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tableName&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;::&amp;quot;&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;this&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columnName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;      
+ &lt;span class="p"&gt;}&lt;/span&gt;     
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Make sure this new class is defined in the same package where your target model (the one where compression is applied) is located. Make note that this encryption is supported by Ebean only for String and Date fields of your model. Now if you had to say manually decrypt and encrypted field from your SQL client or vice versa you can use the following SQL queries.&lt;/p&gt;
+&lt;h5&gt;decrypt:&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;SELECT CAST(AES_DECRYPT(encrypted-field,'my-encryption-key') as CHAR(50)) from table;&lt;/code&gt;&lt;/p&gt;
+&lt;h5&gt;encrypt:&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;SELECT AES_ENCRYPT(encrypted-field,'my-encryption-key') from table;&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;In case you are using H2-database for development, use the below queries.&lt;/p&gt;
+&lt;h5&gt;decrypt:&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;SELECT TRIM(CHAR(0) FROM UTF8TOSTRING(DECRYPT('AES', STRINGTOUTF8('&amp;lt;encryption-key&amp;gt;'), '&amp;lt;text to be encrypted&amp;gt;'))) from table&lt;/code&gt;&lt;/p&gt;
+&lt;h5&gt;encrypt:&lt;/h5&gt;
+&lt;p&gt;&lt;code&gt;SELECT ENCRYPT('AES', STRINGTOUTF8('&amp;lt;encryption-key&amp;gt;'), STRINGTOUTF8('&amp;lt;text to be encrypted&amp;gt;')) from table;&lt;/code&gt;&lt;/p&gt;</summary><category term="play"></category><category term="ebean"></category><category term="java"></category></entry><entry><title>Attribute access methods</title><link href="http://blog.foobarbaz.info/attribute-access-methods.html" rel="alternate"></link><updated>2015-05-16T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-16:attribute-access-methods.html</id><summary type="html">&lt;p&gt;This blog post is about the magic methods related to attribute access in python. This knowledge is would help you learning advanced concepts such as properties, descriptor, slots etc. 
+Here I when I classes I refer to new-style classes which are classes that inherit &lt;code&gt;object&lt;/code&gt; in Python2 (either directly or indirectly) and All classes in Python3. &lt;/p&gt;
+&lt;h5&gt;&lt;strong&gt;getattr&lt;/strong&gt;:&lt;/h5&gt;
+&lt;p&gt;This method is called when accessing an un-defined attribute in an object. 
+The attribute is searched in self instance object, type's class object and its entire inheritence chain before invoking the &lt;code&gt;__getattr__&lt;/code&gt; method.
+&lt;code&gt;__getattr__&lt;/code&gt; and all attribute access methods like &lt;code&gt;__setattr__&lt;/code&gt;,&lt;code&gt;__delattr__&lt;/code&gt;,&lt;code&gt;__getattribute__&lt;/code&gt; is effective even if one of the parent class implements these method.
+if a class in inheritence chain has custom &lt;code&gt;__getattr__&lt;/code&gt; (or anyone of the attribute access method) defined and you dont want this behaviour then you can revert to normal behaviour by overridding the method with the default behaviou&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;  &lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;Test2&lt;/span&gt;(&lt;span class="n"&gt;Test1&lt;/span&gt;):
+  &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;__getattr__&lt;/span&gt;(&lt;span class="k"&gt;self&lt;/span&gt;,&lt;span class="nb"&gt;name&lt;/span&gt;):
+    &lt;span class="n"&gt;object&lt;/span&gt;.&lt;span class="n"&gt;__getattr__&lt;/span&gt;(&lt;span class="k"&gt;self&lt;/span&gt;,&lt;span class="nb"&gt;name&lt;/span&gt;) 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h5&gt;&lt;strong&gt;setattr&lt;/strong&gt;:&lt;/h5&gt;
+&lt;p&gt;Unlike &lt;code&gt;__getattr__&lt;/code&gt;, &lt;code&gt;__setattr__&lt;/code&gt; is called on attribute assignment irrespective of whether the attribute is already defined or not.
+Be cautious of using &lt;code&gt;__setattr__&lt;/code&gt; because an assignment in &lt;code&gt;__setattr__&lt;/code&gt; on &lt;code&gt;self&lt;/code&gt; causes infinite recursion like shown below.
+To avoid infinite recursion you should use &lt;code&gt;__dict__&lt;/code&gt; based assignment. In &lt;code&gt;__dict__&lt;/code&gt; based assignment you are not assigning to self but on &lt;code&gt;__dict__&lt;/code&gt;. surprisingly &lt;code&gt;setattr&lt;/code&gt; builtin function is not an alternative to &lt;code&gt;__dict__&lt;/code&gt; based assignment and it using it would also cause infinite recursion.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;TestClass&lt;/span&gt;():
+  &lt;span class="n"&gt;def&lt;/span&gt; &lt;span class="n"&gt;__setattr__&lt;/span&gt;(&lt;span class="k"&gt;self&lt;/span&gt;,&lt;span class="nb"&gt;name&lt;/span&gt;,&lt;span class="nb"&gt;value&lt;/span&gt;):
+    &lt;span class="k"&gt;self&lt;/span&gt;.&lt;span class="nb"&gt;name&lt;/span&gt; = &lt;span class="nb"&gt;value&lt;/span&gt; &lt;span class="c-Singleline"&gt;### This will cause infinite recursion&lt;/span&gt;
+    &lt;span class="k"&gt;self&lt;/span&gt;.&lt;span class="n"&gt;__dict__&lt;/span&gt; = {&lt;span class="n"&gt;name:value&lt;/span&gt;} &lt;span class="c-Singleline"&gt;### This will cause infinite recursion&lt;/span&gt;
+    &lt;span class="k"&gt;self&lt;/span&gt;.&lt;span class="n"&gt;__dict__&lt;/span&gt;[&lt;span class="nb"&gt;name&lt;/span&gt;] = &lt;span class="nb"&gt;value&lt;/span&gt; &lt;span class="c-Singleline"&gt;### this will not cause infinite recursion since this is an assignment on __dict__ and not on self i.e the object.&lt;/span&gt;
+    &lt;span class="n"&gt;setattr&lt;/span&gt;(&lt;span class="k"&gt;self&lt;/span&gt;,&lt;span class="nb"&gt;name&lt;/span&gt;) =  &lt;span class="nb"&gt;value&lt;/span&gt; &lt;span class="c-Singleline"&gt;### this will also cause infinite recursion&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h5&gt;&lt;strong&gt;delattr&lt;/strong&gt;:&lt;/h5&gt;
+&lt;p&gt;This method is similar to &lt;code&gt;__setattr__&lt;/code&gt; but called on attribute deletion. &lt;/p&gt;
+&lt;h5&gt;&lt;strong&gt;getattribute&lt;/strong&gt;:&lt;/h5&gt;
+&lt;p&gt;This method is available only in new style classes. This method is called on any attribute access irrespective of it being defined or un-defined.
+This is the method that delegates the call to &lt;code&gt;__getattr__&lt;/code&gt; on undefined attribute access. Hence if you override &lt;code&gt;__getattribute__&lt;/code&gt; make sure you either explicitly call &lt;code&gt;__getattr__&lt;/code&gt; or raise an AttributeError exception on undefined attribute access.&lt;/p&gt;</summary><category term="python"></category></entry><entry><title>Directives Scopes</title><link href="http://blog.foobarbaz.info/directives-scopes.html" rel="alternate"></link><updated>2015-05-16T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-16:directives-scopes.html</id><summary type="html">&lt;p&gt;In this blog post we will discuss about scopes in AngularJS Directives. This post assumes you have atleast beginner level knowledge on AngularJS. By beginner level I mean you would know what are scopes, Directives and its basic structure.&lt;/p&gt;
+&lt;p&gt;By default, Directives inherit the scope of its containing Controller(s). This scope is passed as an argument in the link function of the Directive as shown below&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;$scope&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;$element&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="nx"&gt;$attrs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;  &lt;span class="c1"&gt;// These arguments are not dependency injected and hence their position matters.&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+
+  &lt;span class="cm"&gt;/*&lt;/span&gt;
+&lt;span class="cm"&gt;    The three attributes passed are &lt;/span&gt;
+&lt;span class="cm"&gt;    scope: The effective scope of Controller(s) that is enclose to the Directive.&lt;/span&gt;
+&lt;span class="cm"&gt;    element: jqlite element object of the Directive. in this its something like this angular.element(&amp;quot;&amp;lt;my-custom-Directive param1=\&amp;quot;value1\&amp;quot; param2=\&amp;quot;{{a_Controller_variable}}\&amp;quot;&amp;gt;&amp;quot;)&lt;/span&gt;
+&lt;span class="cm"&gt;    attrs: an helper object with all the html attributes defined as its object attribute&lt;/span&gt;
+&lt;span class="cm"&gt;  */&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;One of the most important design principle with Directives is that they are supposed to be independent reusable entities and should not have hard dependencies with Controllers. A lousy developer might read scope attributes values directly off the scope object passed in the link function which will lead to a situation where you must always use this Directive with a specific Controller that defines that specific attribute. The better way to pass data between Controller scope and link function of a Directive is to pass the data via attributes of the Directive as shown below.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;  &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="nx"&gt;my&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;custom&lt;/span&gt;&lt;span class="o"&gt;-&lt;/span&gt;&lt;span class="nx"&gt;Directive&lt;/span&gt; &lt;span class="nx"&gt;param1&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;value1&amp;quot;&lt;/span&gt; &lt;span class="nx"&gt;param2&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;{{a_controller_variable}}&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="c1"&gt;// in HTML&lt;/span&gt;
+
+  &lt;span class="p"&gt;...&lt;/span&gt;             &lt;span class="c1"&gt;// in Directive definition&lt;/span&gt;
+  &lt;span class="nx"&gt;link&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nx"&gt;scope&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nx"&gt;element&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="nx"&gt;attrs&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;     
+    &lt;span class="kd"&gt;var&lt;/span&gt; &lt;span class="nx"&gt;a1&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nx"&gt;attrs&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;param1&lt;/span&gt;
+    &lt;span class="c1"&gt;// do some DOM manipulation &lt;/span&gt;
+  &lt;span class="p"&gt;}&lt;/span&gt;
+  &lt;span class="p"&gt;...&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;However there is one big darn flaw with the above approach. The Directive link function has no way to track changes to the attribute value. If the value of the &lt;code&gt;a_controller_variable&lt;/code&gt; changes the Directive would not react to this change and hence there is virtually no binding between the Controller and the Directive. One possible solution is to use the &lt;code&gt;$observer&lt;/code&gt; function in attrs as shown below. In this method we register for any changes that happens to the attribute param2 and on change of this attribute we can execute our custom function passed as second parameter to &lt;code&gt;$observer&lt;/code&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;link&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;scope&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;element&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="n"&gt;attrs&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt; &lt;span class="o"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;attrs&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="na"&gt;$observe&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;param2&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;,&lt;/span&gt;&lt;span class="kd"&gt;function&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="n"&gt;value&lt;/span&gt;&lt;span class="o"&gt;){&lt;/span&gt; 
+        &lt;span class="c1"&gt;// do some processing with value parameter&lt;/span&gt;
+    &lt;span class="o"&gt;})&lt;/span&gt;
+&lt;span class="o"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;But this is not an elegant solution and the scope key in the Directive definition comes to save the day. The scope key in Directive definition takes any of the following values&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;false&lt;/code&gt; : This is the default value. This makes the Directive to get a reference the Controller scope to which it is bound.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;true&lt;/code&gt; : This creates a new scope for the Directive but this new scope inherits the Controller scope to which the Directive is bound. Thus the Directive can access all the Controller scope attributes but it cannot overwrite any of those inherited attributes (a kind of one-way binding)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;{}&lt;/code&gt; : (i.e. an empty object): This creates a new scope for the Directive which is completely insulted with its Controller scope object. in AngularJS this is called an isolate scope.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h6&gt;Isolated scope:&lt;/h6&gt;
+&lt;p&gt;Isolate scope is the one we are going to explore now since it is the most recommended way to create re-usable Directive. As said earlier isolated scopes are almost completely insulated from Controller scope and don't share data betweem them. But this would make Directives un-configurable and monotonous. To address this isolate scope provides means to pass configurable data to Directives via attributes. This is achieved by providing key value pairs to the isolate scope object. for example see the example below&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;  &amp;lt;my-custom-Directive key1=&amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;{{&lt;/span&gt;&lt;span class="nv"&gt;ctrl.var&lt;/span&gt;&lt;span class="cp"&gt;}}&lt;/span&gt;&lt;span class="x"&gt;&amp;quot; key2=&amp;quot;ctrl.obj&amp;quot; key3=&amp;quot;ctrl.func()&amp;quot;&amp;gt;&lt;/span&gt;
+
+&lt;span class="x"&gt;  key: {&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;key1&amp;#39;: &amp;#39;@&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;key2&amp;#39;: &amp;#39;=&amp;#39;,&lt;/span&gt;
+&lt;span class="x"&gt;    &amp;#39;key3&amp;#39;: &amp;#39;&amp;amp;&amp;#39;&lt;/span&gt;
+&lt;span class="x"&gt;  }&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Lets discuss each of the symbols defined above&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;@&lt;/code&gt; : The &lt;code&gt;@&lt;/code&gt; symbol means that the value provided to the key1 attribute must be a expression that should resolve to a string. It can be a Controller attribute which resolves To a string value as shown above or a plain string like &lt;code&gt;key="xyz"&lt;/code&gt;. Use this if you want one way binding between your Controller and Directive in the direction of from Controller to Directive. &lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;=&lt;/code&gt; : This means that the Directive attribute holds reference to a JSON object usually which is inside the scope object of the Controller. This object reference is passed down to the Directive's isolate scope. The key point is that now both Controller scope and Directive scope has reference to the same JSON object and hence this can be used for two way binding between the Controller and the Directive.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;'&amp;amp;'&lt;/code&gt; : This is similar to the &lt;code&gt;=&lt;/code&gt; sign but instead of passing a reference of a JSON object in Controller scope, a function reference is passed down. The Directive then can invoke this Controller function when required.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;</summary><category term="AngularJS"></category></entry><entry><title>Python Unicode and Bytestrings</title><link href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html" rel="alternate"></link><updated>2015-05-08T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-08:python-unicode-and-bytestrings.html</id><summary type="html">&lt;p&gt;Python Strings encoding.&lt;/p&gt;
+&lt;p&gt;One of the major transformations in Python from 2.X to 3.X is with Strings and how unicode data is handled. Ned Batchelder gave an excellent session about this on Pycon-2012. I will provide a brief summary about it in this blog post but I would urge you to watch the emmbedded video of the session given at the end of this blog.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Python has two types of strings called byte-string and unicode and both subclass from type base-string.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;byte-string has series of bytes to represent strings which the computers can understand. The byte-strings are usually encoded in ascii by default. this default can be deduced by the below snippet&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;sys&lt;/span&gt;
+&lt;span class="o"&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class="n"&gt;sys&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;getdefaultencoding&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;span class="s"&gt;&amp;#39;ascii&amp;#39;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Unicode is not an encoding scheme like ASCII,UTF-8 or UTF-16. The latter provides a mapping between each character and the byte(s) that should be represented with. Whereas unicode provides an abstract concept called code points for each character symbols. for eg: the code point of pound symbol (£) is &lt;code&gt;\u00A3&lt;/code&gt;. Computers cannot understand unicode code-points. They require encoding schemes like UTF-8,UTF-32 or iso-8859-1 (Latin1) encoding schemes that translates these code-points to bytestreams.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Python unicode-string type is a string of unicode codepoints and byte-string is a string of byte array with a specific encoding. You can convert a unicode-string to a byte-string with encode function passing the encoding to be used as a parameter like this &lt;code&gt;u'ç'.encode('utf8')&lt;/code&gt;. The unicode-string as an additional decode function but you will mostly never use it and hence ignore it for now.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Similarly a byte-string can be converted to unicode-string with decode operation like this &lt;code&gt;'\xc3\xa7'.decode('utf8')&lt;/code&gt;. The decode function takes the encoding to be used and it must be the same encoding which was used to encode this byte-string. Usually you wouldn't use the encode operation on byte string since it is already encoded but yet this function is available in byte-string.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;In Python 2.X the byte-string is the default string and when used along with unicode the byte-string would implicitly convert to unicode using the default encoding. In 3.X the unicode is the default string and you need to prefix bystrings with b prefix like this &lt;code&gt;b'Hello'&lt;/code&gt;. In 3.X the conversion between unicode and bytestring is no longer implicit and must be handled by the programmer with &lt;code&gt;encode&lt;/code&gt; and &lt;code&gt;decode&lt;/code&gt; functions.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;iframe width="420" height="315" src="https://www.youtube.com/embed/sgHbC6udIqc" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;</summary><category term="python"></category></entry><entry><title>Scala primer</title><link href="http://blog.foobarbaz.info/scala-primer.html" rel="alternate"></link><updated>2015-05-05T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-05:scala-primer.html</id><summary type="html">&lt;p&gt;This Scala primer is not intended as a study material for someone new to Scala but as a refresher for someone who hasn't worked on the technology for a while. &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the type parameter starts with a lowercase then it means the type parameter is unknown. it is semantically equal to a type parameter as underscore.  ie &lt;code&gt;ClassName[t] == ClassName[_]&lt;/code&gt;. use this if you want to use the classname without specifying the type parameter. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;== operator (which is a method) simply calls equals which is logical equality. there is a separate method called eq which looks for object identity.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;empty parantheses () is a synonym for Unit data type. Unlike other languages like Python empty data is not Falsy. ie &lt;code&gt;"" != false&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;Tuple is not a collection in Scala and they can no more then 22 elements. And since it is not a collection it is not iterable.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;{ expression block }&lt;/code&gt; can contain a series of expression and it returns the last expression. It can be used inlieu of a single expression. expression blocks can be nested too.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;for an if statement without the else counterpart, on failure condition the return type is Unit (descendant of AnyVal). This explains the below.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;scala&amp;gt; val a = if (true) { 10 } // LHS is AnyVal and not Int
+a: AnyVal = 10
+
+scala&amp;gt; val a = if (true) { &amp;quot;&amp;quot; } // LHS is Any and not String
+a: Any = &amp;quot;&amp;quot; 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;case match supports multiple patterns with Pipe operator.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;scala&amp;gt; val kind = day match {
+ case &amp;quot;MON&amp;quot; | &amp;quot;TUE&amp;quot; | &amp;quot;WED&amp;quot; | &amp;quot;THU&amp;quot; | &amp;quot;FRI&amp;quot; =&amp;gt;
+ &amp;quot;weekday&amp;quot;
+ case &amp;quot;SAT&amp;quot; | &amp;quot;SUN&amp;quot; =&amp;gt;
+ &amp;quot;weekend&amp;quot;
+ }
+kind: String = weekday
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;procedure is a function that has a return type of Unit. which means it a fully side-effecting function. A function definition without the equal sign means it is a procedure and would ignore the last expression and always return Unit data type.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;if a function is defined without paramaters/parentheses then it has to be called without parentheses. i.e. def test = { } has to be called &lt;code&gt;test&lt;/code&gt; and &lt;code&gt;test()&lt;/code&gt; is not allowed. in these cases if you want to access the function object without invoking the function then you will have to do something like &lt;code&gt;val a = greet _&lt;/code&gt;. Here you are creating a partially applied function for greet. Another alternative here is to explicitly set the type of val a. ie. val a:Int=&amp;gt;String = greet.similarly consider this curried function &lt;code&gt;def add(a:Int)(b:Int)&lt;/code&gt;. now to create a partially applied function you would have make the call as something like this &lt;code&gt;val a = add(10)(_)&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;@annotation.tailrec&lt;/code&gt; use this annotation to ensure tail recursion in a function. If compiler cannot enforce tail recursion optimization then a compile time failure is launched.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;varargs parameter are supported. eg: &lt;code&gt;def test(a:Int*)&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;Even type parameter of a function is optional if it can be inferred. 
+  for eg: &lt;code&gt;def identity[A](a:A) = a  can be called as val a = identity(“string”).&lt;/code&gt;
+  here both the type parameter of the function and as well as the return type of val a are both inferred. &lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;The infix or operator notation famous for one argument object methods like &lt;code&gt;a + b = a.+(b)&lt;/code&gt; can also be used for methods with two parameters like this &lt;code&gt;a + (b,c) = a.+(b,c)&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;A function with single parameter can be expressed with type &lt;code&gt;Int =&amp;gt; Int&lt;/code&gt;. But function with no parameters require an empty parentheses &lt;code&gt;() =&amp;gt; Int&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;function definition and literal forms&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt; // one parameter example
+      def act(s:String,f:String=&amp;gt;String) = f(s)
+      act(&amp;quot;Hello&amp;quot;,(a:String) =&amp;gt; a.reverse) full form
+      act(&amp;quot;Hello&amp;quot;,a =&amp;gt; a.reverse) shorter type inferred form
+      act(&amp;quot;Hello&amp;quot;,_.reverse) placeholder form
+ // two parameter example
+     def act(s1:String,s2:String,f:(String,String)=&amp;gt;String) = f(s1,s2)
+     act(&amp;quot;Hello&amp;quot;,&amp;quot;World&amp;quot;,(a:String,b:String) =&amp;gt; a+b) 
+     act(&amp;quot;Hello&amp;quot;,&amp;quot;World&amp;quot;,(a,b) =&amp;gt; a+b) 
+     act(&amp;quot;Hello&amp;quot;,&amp;quot;World&amp;quot;,_+_) 
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;Partial applied functions can be created with placeholder syntax. for eg&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;def add(a:Int,b:Long) = a+b
+val p1 = add(10,_:Int)
+p1(20)
+val p2 = add(20,_:Long)
+p2(30)
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;Here the palceholder parameters requires explicit type since there is chance of ambiguity due to overloaded method. ie we must unambigously select add(Int,Int) instead of a potential overloaded method add(Int,String)&lt;/p&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;By-name function parameters are denoted with an additional arrow like &lt;code&gt;def func1(a: =&amp;gt; Int) = println(a)&lt;/code&gt;. func1 is not a higher order function that takes function value as argument that returns int as the function definition seems to suggest. The argument can either be a function that returns an Int or can be a direct value Int. if it is a function then the function is evaluated (ie called) everytime when the function is referenced in the func1 method body. &lt;div class="highlight"&gt;&lt;pre&gt;def func1(a: =&amp;gt; Int) = println(a)
+val a = () =&amp;gt; 10
+val b = (a:Int) =&amp;gt; a
+func1(a()) # prints 10
+func1(b(10)) # prints 10
+func1(10) # prints 10
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;Partially applied functions and Partial functions are two different things in Scala. former is a function which has currently defined only a partial list of parameters and yet to define the other parameters. The latter is a function which has restrictions on the values it can accept for the defined parameters. A Partial Function object must have two methods &lt;code&gt;apply&lt;/code&gt; and &lt;code&gt;isDefinedAt&lt;/code&gt; defined.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;a case block statement without a match is a partial function literal. &lt;code&gt;{ case i: Int if i != 0 =&amp;gt; i}&lt;/code&gt; is equivalent to &lt;code&gt;new PartialFunction[Int,Int] { def apply(a:Int) = a; def isDefinedAt(a:Int) = a!=0 }&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;Nil is singleton instance of List[Nothing]. And since Nothing is a subtype of every other type Nil is an empty list of any type&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;apply,unapply and update are special methods in scala. if class called Test had these methods defined on them then&lt;/p&gt;
+&lt;p&gt;apply =&amp;gt; called on Test()&lt;/p&gt;
+&lt;p&gt;unapply =&amp;gt; called when used with pattern matching&lt;/p&gt;
+&lt;p&gt;update =&amp;gt; called on assignment Test(10) = “Some Value”&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr /&gt;
+&lt;ul&gt;
+&lt;li&gt;The Scala collections hierarchy as shown below.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src="http://docs.scala-lang.org/resources/images/collections.mutable.png" alt="Class Hierarchy" style="width: 500px;"/&gt;&lt;/p&gt;</summary><category term="scala"></category></entry></feed>

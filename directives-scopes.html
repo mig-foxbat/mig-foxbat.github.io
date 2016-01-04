@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta property="og:title" content="Directives Scopes"/>
+    <meta property="og:url" content="http://blog.foobarbaz.info/directives-scopes.html"/>
+    <meta property="og:site_name" content="foxbat"/>
+    <meta property="og:type" content="article"/>
+
+    <link rel="canonical" href="http://blog.foobarbaz.info/directives-scopes.html" />
+
+    <title>Directives Scopes | foxbat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap-responsive.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/main.css" type="text/css" />
+    <link href="http://blog.foobarbaz.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="foxbat Atom Feed" />
+
+    <script type="text/javascript">var switchTo5x=true;</script>
+    <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+    <script type="text/javascript">
+        stLight.options({
+            publisher: "",
+            doNotHash: false,
+            doNotCopy: false,
+            hashAddressBar: false
+        });
+    </script>
+</head>
+
+<body id="index">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <header id="banner" >
+                <h1>
+                    <a href="http://blog.foobarbaz.info/">foxbat </a>
+                </h1>
+                <nav class="navbar">
+                    <div class="navbar-inner">
+                        <ul class="nav">
+                            <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
+                            <li class="active"><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </header><!-- /#banner -->
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <div class="row-fluid">
+<div class="span10 offset1">
+  <section>
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="http://blog.foobarbaz.info/directives-scopes.html" rel="bookmark"
+             title="Permalink to Directives Scopes">Directives Scopes</a></h1>
+      </header>
+      <div class="entry-content">
+<footer class="post-info">
+    <address class="vcard author">
+        by <a class="url fn" href="http://blog.foobarbaz.info/author/charles.html">Charles</a>
+    </address>
+
+    in <a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a>
+
+    on 2015-05-16
+
+        |
+        tags:         <a href="http://blog.foobarbaz.info/tag/angularjs.html">AngularJS</a>
+
+
+        |
+        <a href="http://blog.foobarbaz.info/directives-scopes.html#disqus_thread">comments</a>
+
+    
+</footer><!-- /.post-info -->
+
+        <p>In this blog post we will discuss about scopes in AngularJS Directives. This post assumes you have atleast beginner level knowledge on AngularJS. By beginner level I mean you would know what are scopes, Directives and its basic structure.</p>
+<p>By default, Directives inherit the scope of its containing Controller(s). This scope is passed as an argument in the link function of the Directive as shown below</p>
+<div class="highlight"><pre><span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">$element</span><span class="p">,</span> <span class="nx">$attrs</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// These arguments are not dependency injected and hence their position matters.</span>
+<span class="p">}</span>
+
+  <span class="cm">/*</span>
+<span class="cm">    The three attributes passed are </span>
+<span class="cm">    scope: The effective scope of Controller(s) that is enclose to the Directive.</span>
+<span class="cm">    element: jqlite element object of the Directive. in this its something like this angular.element(&quot;&lt;my-custom-Directive param1=\&quot;value1\&quot; param2=\&quot;{{a_Controller_variable}}\&quot;&gt;&quot;)</span>
+<span class="cm">    attrs: an helper object with all the html attributes defined as its object attribute</span>
+<span class="cm">  */</span>
+</pre></div>
+
+
+<p>One of the most important design principle with Directives is that they are supposed to be independent reusable entities and should not have hard dependencies with Controllers. A lousy developer might read scope attributes values directly off the scope object passed in the link function which will lead to a situation where you must always use this Directive with a specific Controller that defines that specific attribute. The better way to pass data between Controller scope and link function of a Directive is to pass the data via attributes of the Directive as shown below.</p>
+<div class="highlight"><pre>  <span class="o">&lt;</span><span class="nx">my</span><span class="o">-</span><span class="nx">custom</span><span class="o">-</span><span class="nx">Directive</span> <span class="nx">param1</span><span class="o">=</span><span class="s2">&quot;value1&quot;</span> <span class="nx">param2</span><span class="o">=</span><span class="s2">&quot;{{a_controller_variable}}&quot;</span><span class="o">&gt;</span> <span class="c1">// in HTML</span>
+
+  <span class="p">...</span>             <span class="c1">// in Directive definition</span>
+  <span class="nx">link</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">scope</span><span class="p">,</span><span class="nx">element</span><span class="p">,</span><span class="nx">attrs</span><span class="p">)</span> <span class="p">{</span>     
+    <span class="kd">var</span> <span class="nx">a1</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">param1</span>
+    <span class="c1">// do some DOM manipulation </span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+</pre></div>
+
+
+<p>However there is one big darn flaw with the above approach. The Directive link function has no way to track changes to the attribute value. If the value of the <code>a_controller_variable</code> changes the Directive would not react to this change and hence there is virtually no binding between the Controller and the Directive. One possible solution is to use the <code>$observer</code> function in attrs as shown below. In this method we register for any changes that happens to the attribute param2 and on change of this attribute we can execute our custom function passed as second parameter to <code>$observer</code></p>
+<div class="highlight"><pre><span class="n">link</span><span class="o">:</span> <span class="kd">function</span><span class="o">(</span><span class="n">scope</span><span class="o">,</span><span class="n">element</span><span class="o">,</span><span class="n">attrs</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">attrs</span><span class="o">.</span><span class="na">$observe</span><span class="o">(</span><span class="s1">&#39;param2&#39;</span><span class="o">,</span><span class="kd">function</span><span class="o">(</span><span class="n">value</span><span class="o">){</span> 
+        <span class="c1">// do some processing with value parameter</span>
+    <span class="o">})</span>
+<span class="o">}</span>
+</pre></div>
+
+
+<p>But this is not an elegant solution and the scope key in the Directive definition comes to save the day. The scope key in Directive definition takes any of the following values</p>
+<ul>
+<li><code>false</code> : This is the default value. This makes the Directive to get a reference the Controller scope to which it is bound.</li>
+<li><code>true</code> : This creates a new scope for the Directive but this new scope inherits the Controller scope to which the Directive is bound. Thus the Directive can access all the Controller scope attributes but it cannot overwrite any of those inherited attributes (a kind of one-way binding)</li>
+<li><code>{}</code> : (i.e. an empty object): This creates a new scope for the Directive which is completely insulted with its Controller scope object. in AngularJS this is called an isolate scope.</li>
+</ul>
+<h6>Isolated scope:</h6>
+<p>Isolate scope is the one we are going to explore now since it is the most recommended way to create re-usable Directive. As said earlier isolated scopes are almost completely insulated from Controller scope and don't share data betweem them. But this would make Directives un-configurable and monotonous. To address this isolate scope provides means to pass configurable data to Directives via attributes. This is achieved by providing key value pairs to the isolate scope object. for example see the example below</p>
+<div class="highlight"><pre><span class="x">  &lt;my-custom-Directive key1=&quot;</span><span class="cp">{{</span><span class="nv">ctrl.var</span><span class="cp">}}</span><span class="x">&quot; key2=&quot;ctrl.obj&quot; key3=&quot;ctrl.func()&quot;&gt;</span>
+
+<span class="x">  key: {</span>
+<span class="x">    &#39;key1&#39;: &#39;@&#39;,</span>
+<span class="x">    &#39;key2&#39;: &#39;=&#39;,</span>
+<span class="x">    &#39;key3&#39;: &#39;&amp;&#39;</span>
+<span class="x">  }</span>
+</pre></div>
+
+
+<p>Lets discuss each of the symbols defined above</p>
+<ul>
+<li>
+<p><code>@</code> : The <code>@</code> symbol means that the value provided to the key1 attribute must be a expression that should resolve to a string. It can be a Controller attribute which resolves To a string value as shown above or a plain string like <code>key="xyz"</code>. Use this if you want one way binding between your Controller and Directive in the direction of from Controller to Directive. </p>
+</li>
+<li>
+<p><code>=</code> : This means that the Directive attribute holds reference to a JSON object usually which is inside the scope object of the Controller. This object reference is passed down to the Directive's isolate scope. The key point is that now both Controller scope and Directive scope has reference to the same JSON object and hence this can be used for two way binding between the Controller and the Directive.</p>
+</li>
+<li>
+<p><code>'&amp;'</code> : This is similar to the <code>=</code> sign but instead of passing a reference of a JSON object in Controller scope, a function reference is passed down. The Directive then can invoke this Controller function when required.</p>
+</li>
+</ul>
+
+      </div><!-- /.entry-content -->
+      <div class="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          var disqus_identifier = "directives-scopes.html";
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://bloghunterkillerinfo.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+      </div>
+
+    </article>
+  </section>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="site-footer">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <address>
+                    <p>
+                        This blog is proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                    </p>
+                    <p>
+                        <a href="http://github.com/jsliang/pelican-fresh/">Fresh</a> is a responsive theme designed by <a href="http://jsliang.com/">jsliang</a> and <a href="https://github.com/jsliang/pelican-fresh/graphs/contributors">contributors</a>.
+                        Special thanks to <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.
+                    </p>
+                </address>
+            </div>
+        </div>
+    </footer>
+
+<script type="text/javascript">
+    var disqus_shortname = 'bloghunterkillerinfo';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://blog.foobarbaz.info/theme/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta property="og:title" content="Scala primer"/>
+    <meta property="og:url" content="http://blog.foobarbaz.info/scala-primer.html"/>
+    <meta property="og:site_name" content="foxbat"/>
+    <meta property="og:type" content="article"/>
+
+    <link rel="canonical" href="http://blog.foobarbaz.info/scala-primer.html" />
+
+    <title>Scala primer | foxbat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap-responsive.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/main.css" type="text/css" />
+    <link href="http://blog.foobarbaz.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="foxbat Atom Feed" />
+
+    <script type="text/javascript">var switchTo5x=true;</script>
+    <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+    <script type="text/javascript">
+        stLight.options({
+            publisher: "",
+            doNotHash: false,
+            doNotCopy: false,
+            hashAddressBar: false
+        });
+    </script>
+</head>
+
+<body id="index">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <header id="banner" >
+                <h1>
+                    <a href="http://blog.foobarbaz.info/">foxbat </a>
+                </h1>
+                <nav class="navbar">
+                    <div class="navbar-inner">
+                        <ul class="nav">
+                            <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
+                            <li class="active"><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </header><!-- /#banner -->
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <div class="row-fluid">
+<div class="span10 offset1">
+  <section>
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="http://blog.foobarbaz.info/scala-primer.html" rel="bookmark"
+             title="Permalink to Scala primer">Scala primer</a></h1>
+      </header>
+      <div class="entry-content">
+<footer class="post-info">
+    <address class="vcard author">
+        by <a class="url fn" href="http://blog.foobarbaz.info/author/charles.html">Charles</a>
+    </address>
+
+    in <a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a>
+
+    on 2015-05-05
+
+        |
+        tags:         <a href="http://blog.foobarbaz.info/tag/scala.html">scala</a>
+
+
+        |
+        <a href="http://blog.foobarbaz.info/scala-primer.html#disqus_thread">comments</a>
+
+    
+</footer><!-- /.post-info -->
+
+        <p>This Scala primer is not intended as a study material for someone new to Scala but as a refresher for someone who hasn't worked on the technology for a while. </p>
+<ul>
+<li>If the type parameter starts with a lowercase then it means the type parameter is unknown. it is semantically equal to a type parameter as underscore.  ie <code>ClassName[t] == ClassName[_]</code>. use this if you want to use the classname without specifying the type parameter. </li>
+</ul>
+<hr />
+<ul>
+<li>== operator (which is a method) simply calls equals which is logical equality. there is a separate method called eq which looks for object identity.</li>
+</ul>
+<hr />
+<ul>
+<li>empty parantheses () is a synonym for Unit data type. Unlike other languages like Python empty data is not Falsy. ie <code>"" != false</code></li>
+</ul>
+<hr />
+<ul>
+<li>Tuple is not a collection in Scala and they can no more then 22 elements. And since it is not a collection it is not iterable.</li>
+</ul>
+<hr />
+<ul>
+<li><code>{ expression block }</code> can contain a series of expression and it returns the last expression. It can be used inlieu of a single expression. expression blocks can be nested too.</li>
+</ul>
+<hr />
+<ul>
+<li>for an if statement without the else counterpart, on failure condition the return type is Unit (descendant of AnyVal). This explains the below.</li>
+</ul>
+<div class="highlight"><pre>scala&gt; val a = if (true) { 10 } // LHS is AnyVal and not Int
+a: AnyVal = 10
+
+scala&gt; val a = if (true) { &quot;&quot; } // LHS is Any and not String
+a: Any = &quot;&quot; 
+</pre></div>
+
+
+<hr />
+<ul>
+<li>case match supports multiple patterns with Pipe operator.</li>
+</ul>
+<div class="highlight"><pre>scala&gt; val kind = day match {
+ case &quot;MON&quot; | &quot;TUE&quot; | &quot;WED&quot; | &quot;THU&quot; | &quot;FRI&quot; =&gt;
+ &quot;weekday&quot;
+ case &quot;SAT&quot; | &quot;SUN&quot; =&gt;
+ &quot;weekend&quot;
+ }
+kind: String = weekday
+</pre></div>
+
+
+<hr />
+<ul>
+<li>procedure is a function that has a return type of Unit. which means it a fully side-effecting function. A function definition without the equal sign means it is a procedure and would ignore the last expression and always return Unit data type.</li>
+</ul>
+<hr />
+<ul>
+<li>if a function is defined without paramaters/parentheses then it has to be called without parentheses. i.e. def test = { } has to be called <code>test</code> and <code>test()</code> is not allowed. in these cases if you want to access the function object without invoking the function then you will have to do something like <code>val a = greet _</code>. Here you are creating a partially applied function for greet. Another alternative here is to explicitly set the type of val a. ie. val a:Int=&gt;String = greet.similarly consider this curried function <code>def add(a:Int)(b:Int)</code>. now to create a partially applied function you would have make the call as something like this <code>val a = add(10)(_)</code>.</li>
+</ul>
+<hr />
+<ul>
+<li><code>@annotation.tailrec</code> use this annotation to ensure tail recursion in a function. If compiler cannot enforce tail recursion optimization then a compile time failure is launched.</li>
+</ul>
+<hr />
+<ul>
+<li>varargs parameter are supported. eg: <code>def test(a:Int*)</code>.</li>
+</ul>
+<hr />
+<ul>
+<li>Even type parameter of a function is optional if it can be inferred. 
+  for eg: <code>def identity[A](a:A) = a  can be called as val a = identity(“string”).</code>
+  here both the type parameter of the function and as well as the return type of val a are both inferred. </li>
+</ul>
+<hr />
+<ul>
+<li>The infix or operator notation famous for one argument object methods like <code>a + b = a.+(b)</code> can also be used for methods with two parameters like this <code>a + (b,c) = a.+(b,c)</code></li>
+</ul>
+<hr />
+<ul>
+<li>A function with single parameter can be expressed with type <code>Int =&gt; Int</code>. But function with no parameters require an empty parentheses <code>() =&gt; Int</code>.</li>
+</ul>
+<hr />
+<ul>
+<li>function definition and literal forms</li>
+</ul>
+<div class="highlight"><pre> // one parameter example
+      def act(s:String,f:String=&gt;String) = f(s)
+      act(&quot;Hello&quot;,(a:String) =&gt; a.reverse) full form
+      act(&quot;Hello&quot;,a =&gt; a.reverse) shorter type inferred form
+      act(&quot;Hello&quot;,_.reverse) placeholder form
+ // two parameter example
+     def act(s1:String,s2:String,f:(String,String)=&gt;String) = f(s1,s2)
+     act(&quot;Hello&quot;,&quot;World&quot;,(a:String,b:String) =&gt; a+b) 
+     act(&quot;Hello&quot;,&quot;World&quot;,(a,b) =&gt; a+b) 
+     act(&quot;Hello&quot;,&quot;World&quot;,_+_) 
+</pre></div>
+
+
+<hr />
+<ul>
+<li>Partial applied functions can be created with placeholder syntax. for eg</li>
+</ul>
+<div class="highlight"><pre>def add(a:Int,b:Long) = a+b
+val p1 = add(10,_:Int)
+p1(20)
+val p2 = add(20,_:Long)
+p2(30)
+</pre></div>
+
+
+<p>Here the palceholder parameters requires explicit type since there is chance of ambiguity due to overloaded method. ie we must unambigously select add(Int,Int) instead of a potential overloaded method add(Int,String)</p>
+<hr />
+<ul>
+<li>By-name function parameters are denoted with an additional arrow like <code>def func1(a: =&gt; Int) = println(a)</code>. func1 is not a higher order function that takes function value as argument that returns int as the function definition seems to suggest. The argument can either be a function that returns an Int or can be a direct value Int. if it is a function then the function is evaluated (ie called) everytime when the function is referenced in the func1 method body. <div class="highlight"><pre>def func1(a: =&gt; Int) = println(a)
+val a = () =&gt; 10
+val b = (a:Int) =&gt; a
+func1(a()) # prints 10
+func1(b(10)) # prints 10
+func1(10) # prints 10
+</pre></div>
+
+
+</li>
+</ul>
+<hr />
+<ul>
+<li>Partially applied functions and Partial functions are two different things in Scala. former is a function which has currently defined only a partial list of parameters and yet to define the other parameters. The latter is a function which has restrictions on the values it can accept for the defined parameters. A Partial Function object must have two methods <code>apply</code> and <code>isDefinedAt</code> defined.</li>
+</ul>
+<hr />
+<ul>
+<li>a case block statement without a match is a partial function literal. <code>{ case i: Int if i != 0 =&gt; i}</code> is equivalent to <code>new PartialFunction[Int,Int] { def apply(a:Int) = a; def isDefinedAt(a:Int) = a!=0 }</code></li>
+</ul>
+<hr />
+<ul>
+<li>Nil is singleton instance of List[Nothing]. And since Nothing is a subtype of every other type Nil is an empty list of any type</li>
+</ul>
+<hr />
+<ul>
+<li>
+<p>apply,unapply and update are special methods in scala. if class called Test had these methods defined on them then</p>
+<p>apply =&gt; called on Test()</p>
+<p>unapply =&gt; called when used with pattern matching</p>
+<p>update =&gt; called on assignment Test(10) = “Some Value”</p>
+</li>
+</ul>
+<hr />
+<ul>
+<li>The Scala collections hierarchy as shown below.</li>
+</ul>
+<p><img src="http://docs.scala-lang.org/resources/images/collections.mutable.png" alt="Class Hierarchy" style="width: 500px;"/></p>
+
+      </div><!-- /.entry-content -->
+      <div class="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          var disqus_identifier = "scala-primer.html";
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://bloghunterkillerinfo.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+      </div>
+
+    </article>
+  </section>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="site-footer">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <address>
+                    <p>
+                        This blog is proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                    </p>
+                    <p>
+                        <a href="http://github.com/jsliang/pelican-fresh/">Fresh</a> is a responsive theme designed by <a href="http://jsliang.com/">jsliang</a> and <a href="https://github.com/jsliang/pelican-fresh/graphs/contributors">contributors</a>.
+                        Special thanks to <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.
+                    </p>
+                </address>
+            </div>
+        </div>
+    </footer>
+
+<script type="text/javascript">
+    var disqus_shortname = 'bloghunterkillerinfo';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://blog.foobarbaz.info/theme/js/bootstrap.min.js"></script>
+</body>
+</html>

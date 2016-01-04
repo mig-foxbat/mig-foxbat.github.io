@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta property="og:title" content="Python Unicode and Bytestrings"/>
+    <meta property="og:url" content="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html"/>
+    <meta property="og:site_name" content="foxbat"/>
+    <meta property="og:type" content="article"/>
+
+    <link rel="canonical" href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html" />
+
+    <title>Python Unicode and Bytestrings | foxbat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap-responsive.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/main.css" type="text/css" />
+    <link href="http://blog.foobarbaz.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="foxbat Atom Feed" />
+
+    <script type="text/javascript">var switchTo5x=true;</script>
+    <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+    <script type="text/javascript">
+        stLight.options({
+            publisher: "",
+            doNotHash: false,
+            doNotCopy: false,
+            hashAddressBar: false
+        });
+    </script>
+</head>
+
+<body id="index">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <header id="banner" >
+                <h1>
+                    <a href="http://blog.foobarbaz.info/">foxbat </a>
+                </h1>
+                <nav class="navbar">
+                    <div class="navbar-inner">
+                        <ul class="nav">
+                            <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
+                            <li class="active"><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </header><!-- /#banner -->
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <div class="row-fluid">
+<div class="span10 offset1">
+  <section>
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html" rel="bookmark"
+             title="Permalink to Python Unicode and Bytestrings">Python Unicode and Bytestrings</a></h1>
+      </header>
+      <div class="entry-content">
+<footer class="post-info">
+    <address class="vcard author">
+        by <a class="url fn" href="http://blog.foobarbaz.info/author/charles.html">Charles</a>
+    </address>
+
+    in <a href="http://blog.foobarbaz.info/category/python.html">Python</a>
+
+    on 2015-05-08
+
+        |
+        tags:         <a href="http://blog.foobarbaz.info/tag/python.html">python</a>
+
+
+        |
+        <a href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html#disqus_thread">comments</a>
+
+    
+</footer><!-- /.post-info -->
+
+        <p>Python Strings encoding.</p>
+<p>One of the major transformations in Python from 2.X to 3.X is with Strings and how unicode data is handled. Ned Batchelder gave an excellent session about this on Pycon-2012. I will provide a brief summary about it in this blog post but I would urge you to watch the emmbedded video of the session given at the end of this blog.</p>
+<ul>
+<li>
+<p>Python has two types of strings called byte-string and unicode and both subclass from type base-string.</p>
+</li>
+<li>
+<p>byte-string has series of bytes to represent strings which the computers can understand. The byte-strings are usually encoded in ascii by default. this default can be deduced by the below snippet</p>
+</li>
+</ul>
+<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">sys</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+<span class="s">&#39;ascii&#39;</span>
+</pre></div>
+
+
+<ul>
+<li>
+<p>Unicode is not an encoding scheme like ASCII,UTF-8 or UTF-16. The latter provides a mapping between each character and the byte(s) that should be represented with. Whereas unicode provides an abstract concept called code points for each character symbols. for eg: the code point of pound symbol (£) is <code>\u00A3</code>. Computers cannot understand unicode code-points. They require encoding schemes like UTF-8,UTF-32 or iso-8859-1 (Latin1) encoding schemes that translates these code-points to bytestreams.</p>
+</li>
+<li>
+<p>Python unicode-string type is a string of unicode codepoints and byte-string is a string of byte array with a specific encoding. You can convert a unicode-string to a byte-string with encode function passing the encoding to be used as a parameter like this <code>u'ç'.encode('utf8')</code>. The unicode-string as an additional decode function but you will mostly never use it and hence ignore it for now.</p>
+</li>
+<li>
+<p>Similarly a byte-string can be converted to unicode-string with decode operation like this <code>'\xc3\xa7'.decode('utf8')</code>. The decode function takes the encoding to be used and it must be the same encoding which was used to encode this byte-string. Usually you wouldn't use the encode operation on byte string since it is already encoded but yet this function is available in byte-string.</p>
+</li>
+<li>
+<p>In Python 2.X the byte-string is the default string and when used along with unicode the byte-string would implicitly convert to unicode using the default encoding. In 3.X the unicode is the default string and you need to prefix bystrings with b prefix like this <code>b'Hello'</code>. In 3.X the conversion between unicode and bytestring is no longer implicit and must be handled by the programmer with <code>encode</code> and <code>decode</code> functions.</p>
+</li>
+</ul>
+<iframe width="420" height="315" src="https://www.youtube.com/embed/sgHbC6udIqc" frameborder="0" allowfullscreen></iframe>
+
+      </div><!-- /.entry-content -->
+      <div class="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          var disqus_identifier = "python-unicode-and-bytestrings.html";
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://bloghunterkillerinfo.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+      </div>
+
+    </article>
+  </section>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="site-footer">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <address>
+                    <p>
+                        This blog is proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                    </p>
+                    <p>
+                        <a href="http://github.com/jsliang/pelican-fresh/">Fresh</a> is a responsive theme designed by <a href="http://jsliang.com/">jsliang</a> and <a href="https://github.com/jsliang/pelican-fresh/graphs/contributors">contributors</a>.
+                        Special thanks to <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.
+                    </p>
+                </address>
+            </div>
+        </div>
+    </footer>
+
+<script type="text/javascript">
+    var disqus_shortname = 'bloghunterkillerinfo';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://blog.foobarbaz.info/theme/js/bootstrap.min.js"></script>
+</body>
+</html>
