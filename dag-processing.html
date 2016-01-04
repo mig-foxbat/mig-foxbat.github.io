@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta property="og:title" content="Dag processing"/>
+    <meta property="og:url" content="http://blog.foobarbaz.info/dag-processing.html"/>
+    <meta property="og:site_name" content="foxbat"/>
+    <meta property="og:type" content="article"/>
+
+    <link rel="canonical" href="http://blog.foobarbaz.info/dag-processing.html" />
+
+    <title>Dag processing | foxbat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap-responsive.min.css" type="text/css" />
+
+    <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/main.css" type="text/css" />
+    <link href="http://blog.foobarbaz.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="foxbat Atom Feed" />
+
+    <script type="text/javascript">var switchTo5x=true;</script>
+    <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+    <script type="text/javascript">
+        stLight.options({
+            publisher: "",
+            doNotHash: false,
+            doNotCopy: false,
+            hashAddressBar: false
+        });
+    </script>
+</head>
+
+<body id="index">
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <header id="banner" >
+                <h1>
+                    <a href="http://blog.foobarbaz.info/">foxbat </a>
+                </h1>
+                <nav class="navbar">
+                    <div class="navbar-inner">
+                        <ul class="nav">
+                            <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
+                            <li class="active"><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </header><!-- /#banner -->
+        </div>
+    </div>
+
+    <div class="row-fluid">
+        <div class="span10 offset1">
+            <div class="row-fluid">
+<div class="span10 offset1">
+  <section>
+    <article>
+      <header>
+        <h1 class="entry-title">
+          <a href="http://blog.foobarbaz.info/dag-processing.html" rel="bookmark"
+             title="Permalink to Dag processing">Dag processing</a></h1>
+      </header>
+      <div class="entry-content">
+<footer class="post-info">
+    <address class="vcard author">
+        by <a class="url fn" href="http://blog.foobarbaz.info/author/charles.html">Charles</a>
+    </address>
+
+    in <a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a>
+
+    on 2016-01-03
+
+        |
+        tags:         <a href="http://blog.foobarbaz.info/tag/scala.html">scala</a>
+        <a href="http://blog.foobarbaz.info/tag/dag.html">DAG</a>
+        <a href="http://blog.foobarbaz.info/tag/sorting.html">sorting</a>
+
+
+        |
+        <a href="http://blog.foobarbaz.info/dag-processing.html#disqus_thread">comments</a>
+
+    
+</footer><!-- /.post-info -->
+
+        <p>Identifying cyclic dependencies in DAG might sound intimidating but it is quite simple.
+In this article I will be showing to do it via Topological sorting. Topological sorting is simply the process of Linearizing a DAG. If Graph is cyclic your Topological sorting will fail (cannot proceed). </p>
+<h4>How the it works</h4>
+<p>Lets say you have Graph called <code>unsorted_graph</code> as shown in the below image. You now traverse your graph starting with nodes that don't have any dependencies (no incoming edges). In our example these nodes will be Node A and G. Node A and G are removed from <code>unsorted_graph</code> and moved to our new target graph <code>sorted_graph</code>.  Then again the source graph is queried for free nodes with no dependencies (no incoming edges). This time it will Node B (since Node A is already removed from the graph) and it will placed into the new graph preserving its dependency with A. The process is repeated untill there are no more nodes in your source graph.</p>
+<p><img alt="Directed Acyclic Graph" src="/images/dag/dag.svg" /></p>
+<h4>Identify cyclic dependencies</h4>
+<p>As we walk our source graph identifying free nodes with no dependencies we would go to point sooner or later where there are no more free nodes in the graph before all nodes have been exhausted. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. </p>
+<h5>Code snippet</h5>
+<div class="highlight"><pre>case class Node(id: Int, dependencies: List[Node] = List()) {
+
+  def this(id: Int, node: Node) = this(id,List(node))
+
+  override def equals(that: Any): Boolean = {
+    that match {
+      case node: Node =&gt; node.id == this.id
+      case _ =&gt; false
+    }
+  }
+
+  override def toString = {
+    s&quot;$id -&gt; ${(dependencies map {_.id}).mkString(&quot;,&quot;)}&quot;
+  }
+
+}
+
+class Dag(val graph: List[Node]) {
+
+  def sort(): Dag = {
+    new Dag(topSort(graph))
+  }
+
+  @tailrec
+  private def topSort(unsorted_graph: List[Node], sorted_graph: List[Node] = Nil):List[Node] = {
+    (unsorted_graph ,sorted_graph) match {
+      case (Nil,a) =&gt;  a
+      case _ =&gt; {
+        val open_nodes = unsorted_graph collect {
+          case node @ Node(_,Nil) =&gt; node
+          case node @ Node(_, dependencies) if dependencies forall { sorted_graph contains _ } =&gt; node
+        }
+        if (open_nodes isEmpty) { throw new RuntimeException(&quot;Cycles Detected in DAG&quot;)}
+        topSort(unsorted_graph filterNot { open_nodes contains _  },sorted_graph ++ open_nodes)
+      }
+    }
+  }
+
+  override def toString = {
+    this.graph.toString()
+  }
+
+}
+</pre></div>
+
+
+<h5>Sample Execution</h5>
+<div class="highlight"><pre>    val nodes = Node(1,Nil) :: Node(2,List(Node(1))) :: Node(3,List(Node(1))) :: Node(4,List(Node(2),Node(3))) ::
+      Node(6,Nil) :: Node(5,List(Node(4),Node(6))) :: Nil
+    val dag = new Dag(nodes) 
+    println(dag.sort().toString)
+</pre></div>
+
+      </div><!-- /.entry-content -->
+      <div class="comments">
+        <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+          var disqus_identifier = "dag-processing.html";
+          (function() {
+          var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+          dsq.src = 'http://bloghunterkillerinfo.disqus.com/embed.js';
+          (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+          })();
+        </script>
+      </div>
+
+    </article>
+  </section>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <footer id="site-footer">
+        <div class="row-fluid">
+            <div class="span10 offset1">
+                <address>
+                    <p>
+                        This blog is proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                    </p>
+                    <p>
+                        <a href="http://github.com/jsliang/pelican-fresh/">Fresh</a> is a responsive theme designed by <a href="http://jsliang.com/">jsliang</a> and <a href="https://github.com/jsliang/pelican-fresh/graphs/contributors">contributors</a>.
+                        Special thanks to <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a> and <a href="http://twitter.github.com/bootstrap">Twitter Bootstrap</a>.
+                    </p>
+                </address>
+            </div>
+        </div>
+    </footer>
+
+<script type="text/javascript">
+    var disqus_shortname = 'bloghunterkillerinfo';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://blog.foobarbaz.info/theme/js/bootstrap.min.js"></script>
+</body>
+</html>

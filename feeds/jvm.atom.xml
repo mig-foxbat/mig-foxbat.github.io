@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>foxbat</title><link href="http://blog.foobarbaz.info/" rel="alternate"></link><link href="http://blog.foobarbaz.info/feeds/jvm.atom.xml" rel="self"></link><id>http://blog.foobarbaz.info/</id><updated>2015-05-31T00:00:00-07:00</updated><entry><title>Scala collection functions</title><link href="http://blog.foobarbaz.info/scala-collection-functions.html" rel="alternate"></link><updated>2015-05-31T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-31:scala-collection-functions.html</id><summary type="html">&lt;p&gt;Scala collections library has an impressive arsenal of functions to process sequences in a functional approach. Only a very few are being listed down here.&lt;/p&gt;</summary><category term="scala"></category><category term="collections"></category></entry><entry><title>Ebean encryption</title><link href="http://blog.foobarbaz.info/ebean-encryption.html" rel="alternate"></link><updated>2015-05-26T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-26:ebean-encryption.html</id><summary type="html">&lt;p&gt;If you want to encrypt a database field and you happen to use Play-Framework 2.x, Mysql and Ebean for ORM, this blog post will help you achieve just that.&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>foxbat</title><link href="http://blog.foobarbaz.info/" rel="alternate"></link><link href="http://blog.foobarbaz.info/feeds/jvm.atom.xml" rel="self"></link><id>http://blog.foobarbaz.info/</id><updated>2016-01-03T00:00:00-08:00</updated><entry><title>Dag processing</title><link href="http://blog.foobarbaz.info/dag-processing.html" rel="alternate"></link><updated>2016-01-03T00:00:00-08:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2016-01-03:dag-processing.html</id><summary type="html">&lt;p&gt;Identifying cyclic dependencies in DAG might sound intimidating but it is quite simple.
+In this article I will be showing to do it via Topological sorting. Topological sorting is simply the process of Linearizing a DAG. If Graph is cyclic your Topological sorting will fail (cannot proceed). &lt;/p&gt;
+&lt;h4&gt;How the it works&lt;/h4&gt;
+&lt;p&gt;Lets say you have Graph called &lt;code&gt;unsorted_graph&lt;/code&gt; as shown in the below image. You now traverse your graph starting with nodes that don't have any dependencies (no incoming edges). In our example these nodes will be Node A and G. Node A and G are removed from &lt;code&gt;unsorted_graph&lt;/code&gt; and moved to our new target graph &lt;code&gt;sorted_graph&lt;/code&gt;.  Then again the source graph is queried for free nodes with no dependencies (no incoming edges). This time it will Node B (since Node A is already removed from the graph) and it will placed into the new graph preserving its dependency with A. The process is repeated untill there are no more nodes in your source graph.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Directed Acyclic Graph" src="/images/dag/dag.svg" /&gt;&lt;/p&gt;
+&lt;h4&gt;Identify cyclic dependencies&lt;/h4&gt;
+&lt;p&gt;As we walk our source graph identifying free nodes with no dependencies we would go to point sooner or later where there are no more free nodes in the graph before all nodes have been exhausted. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. &lt;/p&gt;
+&lt;h5&gt;Code snippet&lt;/h5&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;case class Node(id: Int, dependencies: List[Node] = List()) {
+
+  def this(id: Int, node: Node) = this(id,List(node))
+
+  override def equals(that: Any): Boolean = {
+    that match {
+      case node: Node =&amp;gt; node.id == this.id
+      case _ =&amp;gt; false
+    }
+  }
+
+  override def toString = {
+    s&amp;quot;$id -&amp;gt; ${(dependencies map {_.id}).mkString(&amp;quot;,&amp;quot;)}&amp;quot;
+  }
+
+}
+
+class Dag(val graph: List[Node]) {
+
+  def sort(): Dag = {
+    new Dag(topSort(graph))
+  }
+
+  @tailrec
+  private def topSort(unsorted_graph: List[Node], sorted_graph: List[Node] = Nil):List[Node] = {
+    (unsorted_graph ,sorted_graph) match {
+      case (Nil,a) =&amp;gt;  a
+      case _ =&amp;gt; {
+        val open_nodes = unsorted_graph collect {
+          case node @ Node(_,Nil) =&amp;gt; node
+          case node @ Node(_, dependencies) if dependencies forall { sorted_graph contains _ } =&amp;gt; node
+        }
+        if (open_nodes isEmpty) { throw new RuntimeException(&amp;quot;Cycles Detected in DAG&amp;quot;)}
+        topSort(unsorted_graph filterNot { open_nodes contains _  },sorted_graph ++ open_nodes)
+      }
+    }
+  }
+
+  override def toString = {
+    this.graph.toString()
+  }
+
+}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h5&gt;Sample Execution&lt;/h5&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;    val nodes = Node(1,Nil) :: Node(2,List(Node(1))) :: Node(3,List(Node(1))) :: Node(4,List(Node(2),Node(3))) ::
+      Node(6,Nil) :: Node(5,List(Node(4),Node(6))) :: Nil
+    val dag = new Dag(nodes) 
+    println(dag.sort().toString)
+&lt;/pre&gt;&lt;/div&gt;</summary><category term="scala"></category><category term="DAG"></category><category term="sorting"></category></entry><entry><title>Scala collection functions</title><link href="http://blog.foobarbaz.info/scala-collection-functions.html" rel="alternate"></link><updated>2015-05-31T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-31:scala-collection-functions.html</id><summary type="html">&lt;p&gt;Scala collections library has an impressive arsenal of functions to process sequences in a functional approach. Only a very few are being listed down here.&lt;/p&gt;</summary><category term="scala"></category><category term="collections"></category></entry><entry><title>Ebean encryption</title><link href="http://blog.foobarbaz.info/ebean-encryption.html" rel="alternate"></link><updated>2015-05-26T00:00:00-07:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2015-05-26:ebean-encryption.html</id><summary type="html">&lt;p&gt;If you want to encrypt a database field and you happen to use Play-Framework 2.x, Mysql and Ebean for ORM, this blog post will help you achieve just that.&lt;/p&gt;
 &lt;p&gt;Now the best way to achieve this is to use &lt;code&gt;@encrypt&lt;/code&gt; JPA annotation on the model field. Using this annotation would be make the process of encryption/decryption completely transparent to the rest of your codebase. Apart from the model class no other part of your code has to be aware of this process. So for example if you are encrypting a field called password in your model this is how it would look like.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;    @Encrypted
     public String password;
