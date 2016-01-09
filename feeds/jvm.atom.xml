@@ -5,8 +5,9 @@ In this article I will be showing to do it via Topological sorting. Topological 
 &lt;p&gt;Lets say you have Graph called &lt;code&gt;unsorted_graph&lt;/code&gt; as shown in the below image. You now traverse your graph starting with nodes that don't have any dependencies (no incoming edges). In our example these nodes will be Node A and G. Node A and G are removed from &lt;code&gt;unsorted_graph&lt;/code&gt; and moved to our new target graph &lt;code&gt;sorted_graph&lt;/code&gt;.  Then again the source graph is queried for free nodes with no dependencies (no incoming edges). This time it will Node B (since Node A is already removed from the graph) and it will placed into the new graph preserving its dependency with A. The process is repeated untill there are no more nodes in your source graph.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Directed Acyclic Graph" src="/images/dag/dag.svg" /&gt;&lt;/p&gt;
 &lt;h4&gt;Identify cyclic dependencies&lt;/h4&gt;
-&lt;p&gt;As we walk our source graph identifying free nodes with no dependencies we would go to point sooner or later where there are no more free nodes in the graph before all nodes have been exhausted. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. &lt;/p&gt;
+&lt;p&gt;In case of a DAG we would navigate all its nodes and we would created a new sorted graph. But if we had cyclic dependencies in our graph, We would go to point sooner or later where there are no more free nodes in the graph but the graph still has two or more nodes left in it. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. &lt;/p&gt;
 &lt;h5&gt;Code snippet&lt;/h5&gt;
+&lt;p&gt;Below is a functional, immutable and tail recursive implementation of topological sorting of graphs in scala.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;case class Node(id: Int, dependencies: List[Node] = List()) {
 
   def this(id: Int, node: Node) = this(id,List(node))

@@ -43,6 +43,7 @@
                         <ul class="nav">
                             <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
                             <li ><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/datastore.html">Datastore</a></li>
                             <li class="active"><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
                             <li ><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
                         </ul>
@@ -92,8 +93,9 @@ In this article I will be showing to do it via Topological sorting. Topological 
 <p>Lets say you have Graph called <code>unsorted_graph</code> as shown in the below image. You now traverse your graph starting with nodes that don't have any dependencies (no incoming edges). In our example these nodes will be Node A and G. Node A and G are removed from <code>unsorted_graph</code> and moved to our new target graph <code>sorted_graph</code>.  Then again the source graph is queried for free nodes with no dependencies (no incoming edges). This time it will Node B (since Node A is already removed from the graph) and it will placed into the new graph preserving its dependency with A. The process is repeated untill there are no more nodes in your source graph.</p>
 <p><img alt="Directed Acyclic Graph" src="/images/dag/dag.svg" /></p>
 <h4>Identify cyclic dependencies</h4>
-<p>As we walk our source graph identifying free nodes with no dependencies we would go to point sooner or later where there are no more free nodes in the graph before all nodes have been exhausted. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. </p>
+<p>In case of a DAG we would navigate all its nodes and we would created a new sorted graph. But if we had cyclic dependencies in our graph, We would go to point sooner or later where there are no more free nodes in the graph but the graph still has two or more nodes left in it. We get caught in a classic deadlock scenario where all nodes dependent on someother nodes in the graph and there are no free nodes anymore. </p>
 <h5>Code snippet</h5>
+<p>Below is a functional, immutable and tail recursive implementation of topological sorting of graphs in scala.</p>
 <div class="highlight"><pre>case class Node(id: Int, dependencies: List[Node] = List()) {
 
   def this(id: Int, node: Node) = this(id,List(node))

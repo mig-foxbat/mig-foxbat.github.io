@@ -3,14 +3,14 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta property="og:title" content="Python Unicode and Bytestrings"/>
-    <meta property="og:url" content="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html"/>
+    <meta property="og:title" content="Cassandra vs Hbase"/>
+    <meta property="og:url" content="http://blog.foobarbaz.info/cassandra-vs-hbase.html"/>
     <meta property="og:site_name" content="foxbat"/>
     <meta property="og:type" content="article"/>
 
-    <link rel="canonical" href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html" />
+    <link rel="canonical" href="http://blog.foobarbaz.info/cassandra-vs-hbase.html" />
 
-    <title>Python Unicode and Bytestrings | foxbat</title>
+    <title>Cassandra vs Hbase | foxbat</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="http://blog.foobarbaz.info/theme/css/bootstrap.min.css" type="text/css" />
@@ -43,9 +43,9 @@
                         <ul class="nav">
                             <li><a href="http://blog.foobarbaz.info/pages/about-me.html">About Me</a></li>
                             <li ><a href="http://blog.foobarbaz.info/category/angularjs.html">AngularJS</a></li>
-                            <li ><a href="http://blog.foobarbaz.info/category/datastore.html">Datastore</a></li>
+                            <li class="active"><a href="http://blog.foobarbaz.info/category/datastore.html">Datastore</a></li>
                             <li ><a href="http://blog.foobarbaz.info/category/jvm.html">JVM</a></li>
-                            <li class="active"><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
+                            <li ><a href="http://blog.foobarbaz.info/category/python.html">Python</a></li>
                         </ul>
 
                     </div>
@@ -62,8 +62,8 @@
     <article>
       <header>
         <h1 class="entry-title">
-          <a href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html" rel="bookmark"
-             title="Permalink to Python Unicode and Bytestrings">Python Unicode and Bytestrings</a></h1>
+          <a href="http://blog.foobarbaz.info/cassandra-vs-hbase.html" rel="bookmark"
+             title="Permalink to Cassandra vs Hbase">Cassandra vs Hbase</a></h1>
       </header>
       <div class="entry-content">
 <footer class="post-info">
@@ -71,58 +71,62 @@
         by <a class="url fn" href="http://blog.foobarbaz.info/author/charles.html">Charles</a>
     </address>
 
-    in <a href="http://blog.foobarbaz.info/category/python.html">Python</a>
+    in <a href="http://blog.foobarbaz.info/category/datastore.html">Datastore</a>
 
-    on 2015-05-08
-
-        |
-        tags:         <a href="http://blog.foobarbaz.info/tag/python.html">python</a>
-
+    on 2016-01-09
 
         |
-        <a href="http://blog.foobarbaz.info/python-unicode-and-bytestrings.html#disqus_thread">comments</a>
+        tags:         <a href="http://blog.foobarbaz.info/tag/cassandra.html">Cassandra</a>
+        <a href="http://blog.foobarbaz.info/tag/hbase.html">Hbase</a>
+
+
+        |
+        <a href="http://blog.foobarbaz.info/cassandra-vs-hbase.html#disqus_thread">comments</a>
 
     
 </footer><!-- /.post-info -->
 
-        <p>Python Strings encoding.</p>
-<p>One of the major transformations in Python from 2.X to 3.X is with Strings and how unicode data is handled. Ned Batchelder gave an excellent session about this on Pycon-2012. I will provide a brief summary about it in this blog post but I would urge you to watch the emmbedded video of the session given at the end of this blog.</p>
+        <p>Following is brief rant on why Cassandra is better than Hbase.</p>
 <ul>
 <li>
-<p>Python has two types of strings called byte-string and unicode and both subclass from type base-string.</p>
+<p>Cassandra has been built from the ground up to be a scalable data store. Whereas Hbase runs on top of HDFS which isn't designed for random reads. HBase manages to support random reads/writes with few tricks memory caching and asynchronous read/write and compaction. It is a roundabout way to do things and certainly not as efficient as Cassandra.</p>
 </li>
 <li>
-<p>byte-string has series of bytes to represent strings which the computers can understand. The byte-strings are usually encoded in ascii by default. this default can be deduced by the below snippet</p>
+<p>Hbase requires a multiple servers/services to run (Hbase Master, RegionServers, HDFS Namenodes, Zookeeper, Apache Phoenix [optional]) and hence this makes it very brittle. Cassandra is more highly available than its counterpart and has no single point of failure.</p>
+</li>
+<li>
+<p>Cassandra's support for tunable consistency will be very handy for to have fast efficient write and consistent read or consistent writes and fast reads (highly configurable)</p>
+</li>
+<li>
+<p>Cassandra has more affinity towards Spark than Hbase. Hbase is more commonly associated with Hadoop MR. It is already proved Spark is supremely advanced than Hadoop Map-Reduce and Cassandra/Spark is much better tech stack on the whole than Hbase/Hadoop MR.</p>
+</li>
+<li>
+<p>Cassandra sports finer data block size like (256 K blocks) whereas Hbase has something like 64Mb (since it runs on HDFS). We can reduce the HDFS block size but it would increase the load on the namenode server of HDFS (which is again single point of failure). Cassandra has no single point of failures.</p>
+</li>
+<li>
+<p>Cassandra has more contributor and more activity going on its development than Hbase. This translates to better community support, better tooling and library and faster addition of features and bug-fixes.</p>
+</li>
+<li>
+<p>JVM languages are first class citizens in Hbase. Though other languages are supported via Thrift/Rest there is a significant penalty in performance. Cassandra on the other hand has no bias to any language and supports all.</p>
+</li>
+<li>
+<p>Cassandra's declarative CQL api is advanced than the imperative Hbase API.</p>
+</li>
+<li>
+<p>Cassandra has more adoption than Hbase and the general industry trend is swinging in favour of Cassandra over Hbase.</p>
+</li>
+<li>
+<p>The Cassandra website states that Cassandra is ahead of Hbase by 3 three years in many aspects and features.</p>
 </li>
 </ul>
-<div class="highlight"><pre><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">sys</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
-<span class="s">&#39;ascii&#39;</span>
-</pre></div>
-
-
-<ul>
-<li>
-<p>Unicode is not an encoding scheme like ASCII,UTF-8 or UTF-16. The latter provides a mapping between each character and the byte(s) that should be represented with. Whereas unicode provides an abstract concept called code points for each character symbols. for eg: the code point of pound symbol (£) is <code>\u00A3</code>. Computers cannot understand unicode code-points. They require encoding schemes like UTF-8,UTF-32 or iso-8859-1 (Latin1) encoding schemes that translates these code-points to bytestreams.</p>
-</li>
-<li>
-<p>Python unicode-string type is a string of unicode codepoints and byte-string is a string of byte array with a specific encoding. You can convert a unicode-string to a byte-string with encode function passing the encoding to be used as a parameter like this <code>u'ç'.encode('utf8')</code>. The unicode-string as an additional decode function but you will mostly never use it and hence ignore it for now.</p>
-</li>
-<li>
-<p>Similarly a byte-string can be converted to unicode-string with decode operation like this <code>'\xc3\xa7'.decode('utf8')</code>. The decode function takes the encoding to be used and it must be the same encoding which was used to encode this byte-string. Usually you wouldn't use the encode operation on byte string since it is already encoded but yet this function is available in byte-string.</p>
-</li>
-<li>
-<p>In Python 2.X the byte-string is the default string and when used along with unicode the byte-string would implicitly convert to unicode using the default encoding. In 3.X the unicode is the default string and you need to prefix bystrings with b prefix like this <code>b'Hello'</code>. In 3.X the conversion between unicode and bytestring is no longer implicit and must be handled by the programmer with <code>encode</code> and <code>decode</code> functions.</p>
-</li>
-</ul>
-<iframe width="420" height="315" src="https://www.youtube.com/embed/sgHbC6udIqc" frameborder="0" allowfullscreen></iframe>
+<p>To conclude Cassandra is simply a better piece of software which was designed from the ground up to be a parallel, scalable, fault tolerent and have efficient read/writes. Hbase on the other side is a system that runs on top of HDFS which was not designed for random read/write and which is not truly linearly scalable (because of its assymmetric architecture with Namenodes as single point of failure). Many benchmark test has confirmed that Cassandra scales better than Hbase and is much faster than Hbase. Cassandra is emerging as the clear winner in the No-SQL wars against Hbase. Cassandra is going to get more adoption and more support in the community and is going to add features at the much faster pace than Hbase. </p>
 
       </div><!-- /.entry-content -->
       <div class="comments">
         <h2>Comments</h2>
         <div id="disqus_thread"></div>
         <script type="text/javascript">
-          var disqus_identifier = "python-unicode-and-bytestrings.html";
+          var disqus_identifier = "cassandra-vs-hbase.html";
           (function() {
           var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
           dsq.src = 'http://bloghunterkillerinfo.disqus.com/embed.js';

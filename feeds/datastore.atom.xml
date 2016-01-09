@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>foxbat</title><link href="http://blog.foobarbaz.info/" rel="alternate"></link><link href="http://blog.foobarbaz.info/feeds/datastore.atom.xml" rel="self"></link><id>http://blog.foobarbaz.info/</id><updated>2016-01-09T00:00:00-08:00</updated><entry><title>Cassandra vs Hbase</title><link href="http://blog.foobarbaz.info/cassandra-vs-hbase.html" rel="alternate"></link><updated>2016-01-09T00:00:00-08:00</updated><author><name>Charles</name></author><id>tag:blog.foobarbaz.info,2016-01-09:cassandra-vs-hbase.html</id><summary type="html">&lt;p&gt;Following is brief rant on why Cassandra is better than Hbase.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra has been built from the ground up to be a scalable data store. Whereas Hbase runs on top of HDFS which isn't designed for random reads. HBase manages to support random reads/writes with few tricks memory caching and asynchronous read/write and compaction. It is a roundabout way to do things and certainly not as efficient as Cassandra.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Hbase requires a multiple servers/services to run (Hbase Master, RegionServers, HDFS Namenodes, Zookeeper, Apache Phoenix [optional]) and hence this makes it very brittle. Cassandra is more highly available than its counterpart and has no single point of failure.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra's support for tunable consistency will be very handy for to have fast efficient write and consistent read or consistent writes and fast reads (highly configurable)&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra has more affinity towards Spark than Hbase. Hbase is more commonly associated with Hadoop MR. It is already proved Spark is supremely advanced than Hadoop Map-Reduce and Cassandra/Spark is much better tech stack on the whole than Hbase/Hadoop MR.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra sports finer data block size like (256 K blocks) whereas Hbase has something like 64Mb (since it runs on HDFS). We can reduce the HDFS block size but it would increase the load on the namenode server of HDFS (which is again single point of failure). Cassandra has no single point of failures.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra has more contributor and more activity going on its development than Hbase. This translates to better community support, better tooling and library and faster addition of features and bug-fixes.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;JVM languages are first class citizens in Hbase. Though other languages are supported via Thrift/Rest there is a significant penalty in performance. Cassandra on the other hand has no bias to any language and supports all.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra's declarative CQL api is advanced than the imperative Hbase API.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Cassandra has more adoption than Hbase and the general industry trend is swinging in favour of Cassandra over Hbase.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The Cassandra website states that Cassandra is ahead of Hbase by 3 three years in many aspects and features.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;To conclude Cassandra is simply a better piece of software which was designed from the ground up to be a parallel, scalable, fault tolerent and have efficient read/writes. Hbase on the other side is a system that runs on top of HDFS which was not designed for random read/write and which is not truly linearly scalable (because of its assymmetric architecture with Namenodes as single point of failure). Many benchmark test has confirmed that Cassandra scales better than Hbase and is much faster than Hbase. Cassandra is emerging as the clear winner in the No-SQL wars against Hbase. Cassandra is going to get more adoption and more support in the community and is going to add features at the much faster pace than Hbase. &lt;/p&gt;</summary><category term="Cassandra"></category><category term="Hbase"></category></entry></feed>
